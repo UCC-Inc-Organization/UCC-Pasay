@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prayer and Praise Form</title>
+  <title>UCC Pasay Church Prayer and Praise Form</title>
 
   <style>
     body {
@@ -12,7 +12,23 @@
       margin: 0;
       padding: 20px;
     }
+.radio-group {
+  text-align: left;
+}
 
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.radio-group input[type="radio"],
+.radio-group input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
     .container {
       max-width: 500px;
       margin: auto;
@@ -24,7 +40,15 @@
 
     h2 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
 
     .verse-box {
@@ -104,19 +128,14 @@
       color: #9b1c1c;
       border: 1px solid #f3bcbc;
     }
-
-    .note {
-      font-size: 12px;
-      color: #666;
-      margin-top: 5px;
-    }
   </style>
 </head>
 
 <body>
 
   <div class="container">
-    <h2>Prayer and Praise Form</h2>
+    <h2>UCC Pasay Church</h2>
+    <p class="subtitle">Prayer and Praise Form</p>
 
     <div id="verseBox" class="verse-box"></div>
 
