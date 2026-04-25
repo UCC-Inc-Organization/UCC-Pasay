@@ -1,81 +1,239 @@
-<script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygUo7SL3totMsn5-MGG3w1r5EIWUGj5HEst_MWk0-GwwI_zdvAeMcqAVgpX9dPXUPH/exec';
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prayer and Praise Form</title>
 
-  const form = document.getElementById('prayerForm');
-  const statusMessage = document.getElementById('statusMessage');
-
-  function showStatus(message, type) {
-    statusMessage.className = 'status ' + type;
-    statusMessage.textContent = message;
-    statusMessage.style.display = 'block';
-  }
-
-  function resetStatus() {
-    statusMessage.className = 'status';
-    statusMessage.textContent = '';
-    statusMessage.style.display = 'none';
-  }
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    resetStatus();
-
-    const anonymousChecked = document.getElementById('anonymous').checked;
-    const selectedVisibility = document.querySelector('input[name="visibility"]:checked');
-
-    const payload = {
-      name: anonymousChecked
-        ? 'Anonymous'
-        : (document.getElementById('name').value.trim() || 'Anonymous'),
-      contact: document.getElementById('contact').value.trim(),
-      type: document.getElementById('type').value,
-      message: document.getElementById('message').value.trim(),
-      visibility: selectedVisibility ? selectedVisibility.value : '',
-      anonymous: anonymousChecked ? 'Yes' : 'No',
-      submittedAt: new Date().toISOString()
-    };
-
-    try {
-      const res = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await res.text();
-
-      if (!res.ok) {
-        throw new Error('Request failed with status ' + res.status + ': ' + text);
-      }
-
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch (parseError) {
-        throw new Error('Invalid server response: ' + text);
-      }
-
-      if (result.result === 'success') {
-        showStatus('Submitted successfully.', 'success');
-        form.reset();
-      } else {
-        throw new Error(result.message || 'Submission failed.');
-      }
-    } catch (err) {
-      console.error(err);
-      showStatus('Failed to fetch or submit. Check your Apps Script deployment and URL.', 'error');
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
     }
-  });
 
-  window.runTests = function () {
-    return [
-      { name: 'Form exists', pass: !!form },
-      { name: 'Contact field exists', pass: !!document.getElementById('contact') },
-      { name: 'Status message exists', pass: !!statusMessage },
-      { name: 'Script URL is set', pass: !!SCRIPT_URL && SCRIPT_URL !== 'PASTE_YOUR_LATEST_APPS_SCRIPT_EXEC_URL_HERE' }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .verse-box {
+      background: #eef4ff;
+      border-left: 4px solid #2d6cdf;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .radio-group {
+      margin-top: 10px;
+    }
+
+    .radio-group label {
+      font-weight: normal;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: #2d6cdf;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1f4fbf;
+    }
+
+    .status {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #e8f7ed;
+      color: #1d6b35;
+      border: 1px solid #b7e2c1;
+    }
+
+    .error {
+      background: #fdeaea;
+      color: #9b1c1c;
+      border: 1px solid #f3bcbc;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Prayer and Praise Form</h2>
+
+    <div id="verseBox" class="verse-box"></div>
+
+    <form id="prayerForm">
+
+      <label>Pangalan</label>
+      <input type="text" id="name" placeholder="Ilagay ang pangalan" />
+
+      <div class="radio-group">
+        <label>
+          <input type="checkbox" id="anonymous" />
+          Gawing Anonymous
+        </label>
+      </div>
+
+      <label>Contact Number</label>
+      <input type="text" id="contact" placeholder="Hal. 09123456789" required />
+
+      <label>Uri ng Mensahe</label>
+      <select id="type" required>
+        <option value="">Pumili</option>
+        <option value="Prayer Request">Prayer Request / Kahilingan sa Panalangin</option>
+        <option value="Praise Report">Praise Report / Pasasalamat</option>
+      </select>
+
+      <label>Detalye ng Mensahe</label>
+      <textarea id="request" placeholder="Ilagay ang iyong prayer request o praise report" required></textarea>
+
+      <label>Visibility</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="visibility" value="Private" checked />
+          Private — Para sa Pastors at Admin lamang
+        </label>
+        <label>
+          <input type="radio" name="visibility" value="Public" />
+          Public — Maaaring ibahagi sa iba para sa panalangin at encouragement
+        </label>
+      </div>
+
+      <button type="submit" id="submitBtn">Submit</button>
+
+      <div id="statusMessage" class="status"></div>
+
+    </form>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLF6WWKklRmAXBz0eIKXJhRW_jA5T7yOIPVxguZB3yRLvVX8lqoEbBr6KHU4FGA-M/exec";
+
+    const bibleVerses = [
+      "Jeremiah 33:3 — Tumawag ka sa Akin, at sasagutin kita.",
+      "Matthew 21:22 — Anuman ang hingin ninyo sa panalangin, kung kayo ay sumasampalataya, tatanggapin ninyo.",
+      "Philippians 4:6 — Huwag kayong mabalisa sa anumang bagay; idulog ninyo sa Dios ang lahat sa panalangin.",
+      "1 John 5:14 — Kung humingi tayo ayon sa Kanyang kalooban, pinakikinggan Niya tayo.",
+      "Mark 11:24 — Anuman ang hingin ninyo sa panalangin, maniwala kayong natanggap na ninyo.",
+      "Psalm 100:4 — Pumasok kayo sa Kanyang mga pintuan na may pasasalamat.",
+      "Psalm 107:1 — Magpasalamat kayo sa Panginoon, sapagkat Siya ay mabuti."
     ];
-  };
-</script>
+
+    const form = document.getElementById("prayerForm");
+    const statusMessage = document.getElementById("statusMessage");
+    const submitBtn = document.getElementById("submitBtn");
+
+    window.addEventListener("load", function () {
+      const verseBox = document.getElementById("verseBox");
+      verseBox.textContent = bibleVerses[Math.floor(Math.random() * bibleVerses.length)];
+    });
+
+    function showStatus(message, type) {
+      statusMessage.textContent = message;
+      statusMessage.className = "status " + type;
+      statusMessage.style.display = "block";
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const anonymous = document.getElementById("anonymous").checked;
+
+      const data = {
+        name: anonymous ? "Anonymous" : document.getElementById("name").value.trim(),
+        contact: document.getElementById("contact").value.trim(),
+        type: document.getElementById("type").value,
+        request: document.getElementById("request").value.trim(),
+        visibility: document.querySelector('input[name="visibility"]:checked').value
+      };
+
+      if (!data.contact || !data.type || !data.request) {
+        showStatus("Pakikumpleto ang required fields.", "error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(data)
+        });
+
+        showStatus("Na-submit na ang iyong mensahe. Salamat!", "success");
+        form.reset();
+
+      } catch (error) {
+        showStatus("May error sa submission. Pakisubukan muli.", "error");
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit";
+    });
+  </script>
+
+</body>
+</html>
